@@ -2,15 +2,16 @@
         org $8000   
   ; Programa ubicado a partir de $8000 = 32768
  
-qinicio:         di              ; Deshabilitar interrupciones
+inicio:         di              ; Deshabilitar interrupciones
                 ld sp,0         ; Establecer el puntero de pila en la parte alta de la memoria
         
 ;-------------------------------------------------------------------------------------------------
 ;Código del estudiante
 
     CALL pantalla
-    CALL EsperarSoltar
-
+    CALL JugarSlot
+    ld a,e 
+    ld (intento),a
     CALL slot_XY
     CALL Intento
         
@@ -23,55 +24,10 @@ espacioV DB 0;//Espacios de validacion
 intento DB 0,0,0,0;//variable de intentos del usuario
 clave DB 9,0,0,0;
 claveTemp DB 0,0,0,0;
+
         include "pantalla.asm"
-
-EsperarSoltar:;se comprueba si la tecla q es pulsada
-        ld d,$00
-        ld a,$fb       
-        in a,($fe)
-        bit $00,a;con el bit se cambia de tecla,tecla q
-        jr z,EsperarSoltar;si pulsa Salta 
-        inc d
-        ld a,$fb   
-        in a,($fe)
-        bit $01,a;tecla w
-        jr z,EsperarSoltar;si no pulsa Salta 
-        inc d
-        ld a,$fb
-        in a,($fe)
-        bit $02,a;tecla e
-        jr z,EsperarSoltar
-        inc d 
-        ld a,$fb
-        in a,($fe)
-        bit $03,a;tecla r
-        jr z,EsperarSoltar
-        inc d 
-        ld a,$fb
-        in a,($fe)
-        bit $03,a;tecla r
-        jr z,EsperarSoltar
-        inc d
-        ld a,$fb
-        in a,($fe)
-        bit $04,a;tecla t
-        jr z,EsperarSoltar
-        inc d
-        ld a,d 
-        and $06;2 en a significa que no están pulsadas.
-        jr nz,prueba1;entra cuando es 1 el and(cuando las teclas no están pulsadas)
-        RET
-prueba1:
-        ld a,$19
-        ld hl,$5830
-        ld(hl),a
-        RET
-Prueba:;entra aqui si esta pulsando una tecla
-        ld a,$12
-        ld hl,$5830
-        ld(hl),a
-        RET
-
+        include "Teclado.asm"
+   
 slot_XY:
         ld a,1
         ld (intento_actual),a; 
@@ -100,7 +56,5 @@ buclecopia:
         ld c,0;contador 
         ld a,(clave)
         ld b,(claveTemp)
-
         cp b
-   
         RET

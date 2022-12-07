@@ -1,8 +1,8 @@
 L00-2:       equ  00-2h
 L8022:       equ  8022h
 L806C:       equ  806Ch
-L80AF:       equ  80AFh
-L80C6:       equ  80C6h
+L80C0:       equ  80C0h
+L80D7:       equ  80D7h
 
 
              org 2259h
@@ -115,8 +115,8 @@ L80C6:       equ  80C6h
 8001 31 00 00     LD   SP,L00-2+2 
 8004 CD 22 80     CALL L8022  
 8007 CD 6C 80     CALL L806C  
-800A CD AF 80     CALL L80AF  
-800D CD C6 80     CALL L80C6  
+800A CD C0 80     CALL L80C0  
+800D CD D7 80     CALL L80D7  
 8010 L8010:
 8010 18 FE        JR   L8010  
 

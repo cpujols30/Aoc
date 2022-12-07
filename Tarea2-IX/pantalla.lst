@@ -3,10 +3,10 @@
  2    0000 3E 00               ld a,$00
  3    0002 D3 FE               out($fe),a ;Ponemos el marco negro
  4    0004 21 28 58            ld hl,$5828 ;posicion 5828 para poner el tablero en el medio
- 5    0007 06 0A               ld b,10 ;bucle exterior
+ 5    0007 06 0A               ld b,10;bucle exterior
  6    0009 11 28 58             ld de,$5828 ;Uso de variable de como auxiliar para guardar cada linea
- 7    000C              bucleext;
- 8    000C 62 6B               ld hl,de ;metemos el valor en hl,que será el principio de cada linea
+ 7    000C 62 6B                ld hl,de
+ 8    000E              bucleext;
  9    000E 0E 0F                ld c,15;control de bucle 1
 10    0010 3E 09                ld a,$09 ;color a
 11    0012
@@ -49,7 +49,7 @@
 48    003C 23                   inc hl;
 49    003D 0D                   dec c;
 50    003E 20 FC                jr nz,buclepr2
-51    0040 10 CA                djnz bucleext; Finaliza el bucle principal,donde pintará todo menos la ultima linea inferior
+51    0040 10 CC                djnz bucleext; Finaliza el bucle principal,donde pintará todo menos la ultima linea inferior
 52    0042 0E 0F                ld c,15 ;Cargo 15 en c para que me haga la linea 15 pixeles
 53    0044              bucleinf: ;hago el bucle para que pinte las 15 lineas
 54    0044 77                   ld(hl),a
