@@ -1,0 +1,61 @@
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Teclado.asm
+ 1    0000              JugarSlot:
+ 2    0000 1E 00                ld e,$00;funcion que usaremos para que nos almacene cada color
+ 3    0002              bucleteclas:
+ 4    0002 CD 0D 00         CALL EsperarSoltar;llamamos a la funcion EsperarSoltar
+ 5    0005 CD 16 00         CALL EsperarPulsar
+ 6    0008
+ 7    0008
+ 8    0008 FE 01            cp $01;Si a se pone a $01 se termina el bucle
+ 9    000A 20 F6            jr nz,bucleteclas;
+10    000C C9                   RET
+11    000D              EsperarSoltar:;se comprueba si la tecla q es pulsada
+12    000D 3E FB                ld a,$fb
+13    000F DB FE                in a,($fe)
+14    0011 FE FF                cp $FF   ;comprobamos si toda la fila está pulsada
+15    0013 20 F8                jr nz,EsperarSoltar;el bucle sigue hasta que se dejen de pulsar las teclas
+16    0015 C9                   RET
+17    0016
+18    0016              EsperarPulsar:
+19    0016 3E FB                ld a,$fb
+20    0018 DB FE                in a,($fe)
+21    001A CB 47                bit 0,a;Tecla Q
+22    001C 28 12                jr z,TeclaQPulsada;comprobamos que la tecla q está pulsada,si pulsa salta a la función
+23    001E 3E FB                ld a,$fb
+24    0020 DB FE                in a,($fe)
+25    0022 CB 4F                bit 1,a;tecla W
+26    0024 28 14                jr z,TeclaWPulsada;comprobamos que la tecla w está pulsada,si pulsa salta a la función
+27    0026 3E FB                ld a,$fb
+28    0028 DB FE                in a,($fe)
+29    002A CB 67                bit 4,a;Tecla T
+30    002C 28 16                jr z,TeclaTPulsada; comprobamos que la tecla t está pulsada,si pulsa salta a la función
+31    002E 18 E6                jr EsperarPulsar; el bucle no para hasta pulsar una tecla
+32    0030
+33    0030              TeclaQPulsada:;entra aqui si esta pulsando una tecla q
+34    0030 7B                   ld a,e
+35    0031 C6 08               add $08;sumamos el color a e
+36    0033 77                   ld(hl),a
+37    0034 5F                   ld e,a
+38    0035 FE 40               cp $40; si pasa el ultimo color salta al ReinicioColor1 que pone el color de e al primer color
+39    0037 28 0E               jr z,ReinicioColor1
+40    0039 C9                   RET
+41    003A
+42    003A              TeclaWPulsada:
+43    003A 7B                   ld a,e
+44    003B D6 08                sub $08;al pusar la tecla w,restamos el color a e
+45    003D 77                   ld(hl),a
+46    003E 5F                   ld e,a
+47    003F FE 00                cp $00; si llega al primero,reiniciamos el color para que llegue al último
+48    0041 28 08                jr z,ReinicioColor2
+49    0043 C9                   RET
+50    0044              TeclaTPulsada:;si pulsa la tecla t a=1,lo usaremos para finalizar el programa
+51    0044 3E 01                ld a,1
+52    0046 C9                   RET
+53    0047
+54    0047              ReinicioColor1:;Esta tecla pone el color e al principio
+55    0047 1E 00                ld e,$00
+56    0049 28 CB                jr z,EsperarPulsar
+57    004B              ReinicioColor2:;Esta tecla pone el color e al final
+58    004B 1E 32                ld e,$32
+59    004D 28 C7                jr z,EsperarPulsar
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Teclado.asm
