@@ -4,8 +4,8 @@ pantalla:
        ld hl,$5828 ;posicion 5828 para poner el tablero en el medio
        ld b,10;bucle exterior
         ld de,$5828 ;Uso de variable de como auxiliar para guardar cada linea 
+        ld hl,de
 bucleext;
-       ld hl,de ;metemos el valor en hl,que será el principio de cada linea
         ld c,15;control de bucle 1
         ld a,$09 ;color a 
 
