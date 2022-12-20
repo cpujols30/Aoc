@@ -23,14 +23,14 @@ BucleIntentos:
 
 ;-------------------------------------------------------------------------------------------------
 fin:            jr fin          ; Bucle infinito
-intento_actual DB 0,5,0;se guarda en el primer 0 el intento(ld(intento),a->numero de intentos,se saca ld a ,(intento),el segundo 0 es la posicion del primer slot,el tercer 0 es la posición del espacio de validación)
-NumeroIntento DB 0;
 
         include "pantalla.asm"
         include "Teclado.asm"
         include "printat.asm"
         include "Intento.asm"
+
 Texto1: defm "N Intento",0
+intento_actual DB 0,0,0;se guarda en el primer 0 el intento(ld(intento),a->numero de intentos,se saca ld a ,(intento),el segundo 0 es la posicion del primer slot,el tercer 0 es la posición del espacio de validación)
   
 slot_XY:
         ld hl,$5849

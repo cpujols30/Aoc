@@ -4,7 +4,7 @@
                 {
             "label": "sjasmplus",
             "type": "shell",
-            "command": "C:/Users/cpujo/Documents/Assembly Z80/sjasmplus.exe", 
+            "command": "/Applications/sjasmplus118macarm", 
             "args": [
                 "--lst=${fileDirname}/${fileBasenameNoExtension}.lst",
                 "--sld=${fileDirname}/${fileBasenameNoExtension}.sld",
