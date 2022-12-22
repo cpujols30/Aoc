@@ -7,7 +7,7 @@
 
 
 reset_copia:
-
+        ;COPIAR 
         LD BC, num_slots ;num_slots numero cuadrados en cada intento
         LD HL, quiz
         LD DE, copia
@@ -23,7 +23,7 @@ reset_copia:
         LD B, num_slots
         LD C, 4;para que en la pasada de blancos me haga las 4 pasadas de IX nada m?s (el de copia)
 
-B1:
+B1:;COINCIDENCIAS EXACTAS
         LD A, (IX);cargo el primer elemento en a
         LD D, (IY);cargo el primer elemento en d
 
@@ -37,23 +37,24 @@ B1:
 
         ;al coincidir se cambia pero solo se busca la primera coincidencia no las de despues
         ;creo que asi me va a leer la coincidencia en el bucle anidado a lo mejor poner IX 128 e IY a 255
-        LD (IX), 128;sustituye por 128
-        LD (IY), 255;sustituye por 128
-B2:
+        LD (IX), 128;sustituye por 128,para evitar coindicencias adicionales.
+        LD (IY), 255;sustituye por 255,
+B2:;PARA PASAR A LA SIGUIENTE
         INC IX;siguiente elemento de la lista
         INC IY;siguiente elemento de la lista
 
 
         DJNZ B1
 ; Acabo b1 y reseteo a posicion inicial IX e IY
-        LD A, E
+        
+        LD A, E;Negros,Guardar los aciertos exactos.
         LD (negros), A;guardo el n? negros
         LD A, (negros)
         
 
         ;obtengo el n? de negros y lo guardo en e
-        LD A,(blancos)
-        LD E, A
+        LD A,(blancos);blancos son los aciertos no exactos.
+        LD E, A;
 
         LD B, num_slots;reseteamos b
 reset1_IXIY:     

@@ -15,11 +15,8 @@ bucle1: ;bucle para hacer lineas horizontales menos la ultima de todas
        inc hl; ;incremento para que haga la linea
         dec c;decremento c para que no sea bucle infinito(variable del bucle)
        jr nz, bucle1; usamos jr para que tenga como referencia el decremento de c
-       ld c,17;
-buclepr:
-        inc hl;
-        dec c;
-        jr nz,buclepr
+        ld de,$11
+        add hl,de
         ld c,4 ;declaramos c para el siguiente bucle 
 bucleaux: ;este bucle realizará los slots.
         ld a,$09 ;cargo el color azul en a
