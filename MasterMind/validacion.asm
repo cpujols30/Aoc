@@ -115,3 +115,8 @@ reset2_IY:
         RET
 
 
+FINJUEGOW:
+        ld a,(negros)
+        CP 4
+        jr z,FuncionVictoria
+        RET

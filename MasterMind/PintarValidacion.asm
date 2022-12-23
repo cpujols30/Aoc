@@ -3,6 +3,7 @@ PintarColor:
     add hl,de;se lo sumo a hl 
     CALL Comprobarnegros;llamo a la función comprobar negros
     CALL ComprobarBlancos;llamos a la función comprobar blancos
+    CALL FINJUEGOW
     CALL ReinicioNyB;una vez pintados, los reinicio.
     RET
 
@@ -39,9 +40,11 @@ ReinicioNyB:;reiniciamos porque si no en la siguiente jugada se acumularía.
     ld (blancos),a;ponremos blancos a 0
     ld (negros),a;ponemos negros a 0
     RET
-FuncionVictoria:;comprueba si hay 4 negros,es decir, si se ha acertado la posición y el color de los 4
-    ld a,(negros)
-    CP $04
-;metemos la funcion de win
-
+LOSE:
+   ; ld hl llamar a scr lose
+   CALL cargarPantalla
     RET
+FuncionVictoria:
+    ld hl,Win
+    CALL cargarPantalla
+    HALT
