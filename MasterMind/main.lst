@@ -1,0 +1,606 @@
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\main.asm
+  1   0000                      DEVICE ZXSPECTRUM48
+  2   0000                      org $8000
+  3   8000                ; Programa ubicado a partir de $8000 = 32768
+  4   8000
+  5   8000 F3           inicio:         di              ; Deshabilitar interrupciones
+  6   8001 31 00 00                     ld sp,0         ; Establecer el puntero de pila en la parte alta de la memoria
+  7   8004
+  8   8004              ;-------------------------------------------------------------------------------------------------
+  9   8004              ;Código del estudiante
+ 10   8004                  ;PANTALLA DE INICIO
+ 11   8004
+ 12   8004 21 84 85         ld hl,Inicio
+ 13   8007 CD 4D 85         CALL cargarPantalla
+ 14   800A
+ 15   800A CD 57 81         CALL CLEARSCR;Borramos la pantalla
+ 16   800D
+ 17   800D CD 4F 80         CALL Dibujartablero;Dibujamos el tablero
+ 18   8010 CD 6A 84         CALL Texto1Print;Dibujamos el texto de la de abajo a la derecha UFV-2022
+ 19   8013 CD 78 84         CALL Texto2Print;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
+ 20   8016 21 49 58         ld hl,$5849;pondremos hl en esa direccion para probar el funcionamiento
+ 21   8019 0E 0A            ld c,10;ponemos c a 10 ya que son 10 intentos.
+ 22   801B              Juego:
+ 23   801B C5              push bc;nos guardamos c ya que la vamos a usar dentro del programa
+ 24   801C 3A 75 85        ld a,(intento_actual)
+ 25   801F
+ 26   801F 57              ld d,a;intento actual se almacena en d para saber a que slot ir
+ 27   8020 06 04            ld b,4
+ 28   8022
+ 29   8022 DD 21 76 85      ld ix,intento;apunta a intento para ir guardando los intentos.
+ 30   8026 D5               push de;nos guardamos el intento actual
+ 31   8027 E5                push hl;nos guardamos la posición del slot primero en la pila
+ 32   8028              BucleIntentosInt:;este bucle pasa 4 veces,que son el número de slot
+ 33   8028 CD 97 80         CALL JugarSlot;llamamos a JugarSlot para que juegue en el slot
+ 34   802B 7E               ld a,(hl);meto el valor de hl en a
+ 35   802C DD 77 00         ld (ix),a; meto el valor que ha introducido el usuario en intento
+ 36   802F
+ 37   802F DD 23            inc ix; incremeto intento para que el siguiente lo meta en intento +1
+ 38   8031 23               inc hl;incrementamos hl 2 veces  para que vaya al siguiente slot.
+ 39   8032 23               inc hl
+ 40   8033 05               dec b;decrementamos b para hacer el bucle 2 veces
+ 41   8034
+ 42   8034 20 F2            jr nz,BucleIntentosInt
+ 43   8036                 ;una vez termina el bucle llamamos a la función validación.
+ 44   8036 CD 86 84         CALL reset_copia;validación
+ 45   8039 E1               pop hl;sacamos hl para que esté en el primer slot de la fila que toca.
+ 46   803A CD FC 84         CALL PintarColor;Llamamos a la función para que pinte en la validación
+ 47   803D D1               pop de;sacamos d
+ 48   803E 7A               ld a,d;metemos a en d y la incrementamos
+ 49   803F 3C               inc a
+ 50   8040 32 75 85         ld (intento_actual),a
+ 51   8043
+ 52   8043 CD 3F 85         CALL slot_XY;incremento hl en base al numero de intentos que hay
+ 53   8046 C1               pop bc;sacamos bc para poder continuar con el bucle Juego.
+ 54   8047 0D               dec c;
+ 55   8048 20 D1           jr nz,Juego
+ 56   804A CD 34 85         CALL LOSE
+ 57   804D
+ 58   804D
+ 59   804D              ;-------------------------------------------------------------------------------------------------
+ 60   804D 18 FE        fin:            jr fin          ; Bucle infinito
+ 61   804F              ;incluimos las rutinas externas
+ 62   804F                      include "tablero.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\tablero.asm
+  1+  804F              Dibujartablero:
+  2+  804F 3E 00               ld a,$00
+  3+  8051 D3 FE               out($fe),a ;Ponemos el marco negro
+  4+  8053 21 28 58            ld hl,$5828 ;posicion 5828 para poner el tablero en el medio
+  5+  8056 06 0A               ld b,10;bucle exterior
+  6+  8058 11 28 58             ld de,$5828 ;Uso de variable de como auxiliar para guardar cada linea
+  7+  805B 62 6B                ld hl,de
+  8+  805D              bucleext;
+  9+  805D 0E 0F                ld c,15;control de bucle 1
+ 10+  805F 3E 09                ld a,$09 ;color a
+ 11+  8061
+ 12+  8061              bucle1: ;bucle para hacer lineas horizontales menos la ultima de todas
+ 13+  8061
+ 14+  8061 77                  ld(hl),a  ;cargo el color en su sitio
+ 15+  8062 23                  inc hl; ;incremento para que haga la linea
+ 16+  8063 0D                   dec c;decremento c para que no sea bucle infinito(variable del bucle)
+ 17+  8064 20 FB               jr nz, bucle1; usamos jr para que tenga como referencia el decremento de c
+ 18+  8066 11 11 00             ld de,$11
+ 19+  8069 19                   add hl,de
+ 20+  806A 0E 04                ld c,4 ;declaramos c para el siguiente bucle
+ 21+  806C              bucleaux: ;este bucle realizará los slots.
+ 22+  806C 3E 09                ld a,$09 ;cargo el color azul en a
+ 23+  806E 77                   ld (hl),a ;lo metemos en la posición de hl para que lo pinte
+ 24+  806F 23                   inc hl ;incremento hl para meter el siguiente color
+ 25+  8070 3E 01                ld a,$01 ;cargo negro en a
+ 26+  8072 77                   ld(hl),a ;cargo en la posición de hl para que  lo pinte
+ 27+  8073 23                   inc hl ; incremento hl para meter el siguiente color
+ 28+  8074 0D                   dec c ; decremento c para que haga 4 veces el bucle
+ 29+  8075 20 F5                jr nz,bucleaux ;utilizo jr nz para que coja c como variable
+ 30+  8077
+ 31+  8077 3E 09                ld a,$09 ;Cargo el color azul otra vez para realizar la evaluación de aciertos
+ 32+  8079 77                   ld (hl),a ;Cargo en hl,que será el borde del rectangulo
+ 33+  807A 23                   inc hl
+ 34+  807B 3E 01                ld a,$01 ;Cargo el color negro y a continuación realizo un bucle donde me pinte los 5 de color negro
+ 35+  807D 0E 05                ld c,5
+ 36+  807F              bucleaux2:
+ 37+  807F 77                   ld (hl),a
+ 38+  8080 23                   inc hl
+ 39+  8081 0D                   dec c
+ 40+  8082 20 FB                jr nz,bucleaux2
+ 41+  8084 3E 09                ld a,$09 ;Vuelvo a cargar en azul para realizar el borde
+ 42+  8086 77                   ld (hl),a
+ 43+  8087 0E 12                ld c,18;
+ 44+  8089              buclepr2:
+ 45+  8089 23                   inc hl;
+ 46+  808A 0D                   dec c;
+ 47+  808B 20 FC                jr nz,buclepr2
+ 48+  808D 10 CE                djnz bucleext; Finaliza el bucle principal,donde pintará todo menos la ultima linea inferior
+ 49+  808F 0E 0F                ld c,15 ;Cargo 15 en c para que me haga la linea 15 pixeles
+ 50+  8091              bucleinf: ;hago el bucle para que pinte las 15 lineas
+ 51+  8091 77                   ld(hl),a
+ 52+  8092 23                   inc hl
+ 53+  8093 0D                   dec c
+ 54+  8094 20 FB                jr nz,bucleinf ;finaliza el bucle de la linea inferior
+ 55+  8096 C9                   RET
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\tablero.asm
+ 63   8097                      include "Teclado.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Teclado.asm
+  1+  8097              JugarSlot:
+  2+  8097 1E 00                ld e,$00;funcion que usaremos para que nos almacene cada color
+  3+  8099              bucleteclas:
+  4+  8099 CD A4 80         CALL EsperarSoltar;llamamos a la funcion EsperarSoltar
+  5+  809C CD AD 80         CALL EsperarPulsar
+  6+  809F
+  7+  809F
+  8+  809F FE 01            cp $01;Si a se pone a $01 se termina el bucle
+  9+  80A1 20 F6            jr nz,bucleteclas;
+ 10+  80A3 C9                   RET
+ 11+  80A4              EsperarSoltar:;se comprueba si la tecla q es pulsada
+ 12+  80A4 3E FB                ld a,$fb
+ 13+  80A6 DB FE                in a,($fe)
+ 14+  80A8 FE FF                cp $FF   ;comprobamos si toda la fila está pulsada
+ 15+  80AA 20 F8                jr nz,EsperarSoltar;el bucle sigue hasta que se dejen de pulsar las teclas
+ 16+  80AC C9                   RET
+ 17+  80AD
+ 18+  80AD              EsperarPulsar:
+ 19+  80AD 3E FB                ld a,$fb
+ 20+  80AF DB FE                in a,($fe)
+ 21+  80B1 CB 47                bit 0,a;Tecla Q
+ 22+  80B3 28 12                jr z,TeclaQPulsada;comprobamos que la tecla q está pulsada,si pulsa salta a la función
+ 23+  80B5 3E FB                ld a,$fb
+ 24+  80B7 DB FE                in a,($fe)
+ 25+  80B9 CB 4F                bit 1,a;tecla W
+ 26+  80BB 28 14                jr z,TeclaWPulsada;comprobamos que la tecla w está pulsada,si pulsa salta a la función
+ 27+  80BD 3E FB                ld a,$fb
+ 28+  80BF DB FE                in a,($fe)
+ 29+  80C1 CB 67                bit 4,a;Tecla T
+ 30+  80C3 28 16                jr z,TeclaTPulsada; comprobamos que la tecla t está pulsada,si pulsa salta a la función
+ 31+  80C5 18 E6                jr EsperarPulsar; el bucle no para hasta pulsar una tecla
+ 32+  80C7
+ 33+  80C7              TeclaQPulsada:;entra aqui si esta pulsando una tecla q
+ 34+  80C7 7B                   ld a,e
+ 35+  80C8 C6 08               add $08;sumamos el color a e
+ 36+  80CA 77                   ld(hl),a
+ 37+  80CB 5F                   ld e,a
+ 38+  80CC FE 40               cp $40; si pasa el ultimo color salta al ReinicioColor1 que pone el color de e al primer color
+ 39+  80CE 28 0E               jr z,ReinicioColor1
+ 40+  80D0 C9                   RET
+ 41+  80D1
+ 42+  80D1              TeclaWPulsada:
+ 43+  80D1 7B                   ld a,e
+ 44+  80D2 D6 08                sub $08;al pusar la tecla w,restamos el color a e
+ 45+  80D4 77                   ld(hl),a
+ 46+  80D5 5F                   ld e,a
+ 47+  80D6 FE 00                cp $00; si llega al primero,reiniciamos el color para que llegue al último
+ 48+  80D8 28 08                jr z,ReinicioColor2
+ 49+  80DA C9                   RET
+ 50+  80DB              TeclaTPulsada:;si pulsa la tecla t a=1,lo usaremos para finalizar el programa
+ 51+  80DB 3E 01                ld a,1
+ 52+  80DD C9                   RET
+ 53+  80DE
+ 54+  80DE              ReinicioColor1:;Esta tecla pone el color e al principio
+ 55+  80DE 1E 00                ld e,$00
+ 56+  80E0 28 CB                jr z,EsperarPulsar
+ 57+  80E2              ReinicioColor2:;Esta tecla pone el color e al final
+ 58+  80E2 1E 32                ld e,$32
+ 59+  80E4 28 C7                jr z,EsperarPulsar
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Teclado.asm
+ 64   80E6                      include "printat.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\printat.asm
+  1+  80E6              ; -------------------------------
+  2+  80E6              ; ZX Spectrum Text print library
+  3+  80E6              ; Daniel León - AOC - UFV 2020
+  4+  80E6              ; -------------------------------
+  5+  80E6
+  6+  80E6
+  7+  80E6              ; ----------------------------------------------------------------------------------------
+  8+  80E6              ; PRINTAT - Print a string in a position and attributes as per registers:
+  9+  80E6              ;		IN	A	: Bit 7=1 For Flash / Bit 6=1 For Brigh / Bit 5,4,3 for Paper / Bit 2,1,0 for Ink
+ 10+  80E6              ;		IN	B	: Row 0..23
+ 11+  80E6              ;		IN	C	: Column 0..31
+ 12+  80E6              ;		IN	IX	: Address of text (Text must end in a 0)
+ 13+  80E6              ; ----------------------------------------------------------------------------------------
+ 14+  80E6 CD F5 80     PRINTAT:	CALL PREP_PRT				; Update Attribute var &Screen & Attributes pointers
+ 15+  80E9              ; ----------------------------------------------------------------------------------------
+ 16+  80E9              ;		VVV Do not move PRINTSTR below as PRINTAT continues into PRINTSTR routine
+ 17+  80E9              ; ----------------------------------------------------------------------------------------
+ 18+  80E9              ; PRINTSTR - Prints String - IX Points to the String start
+ 19+  80E9              ; ----------------------------------------------------------------------------------------
+ 20+  80E9 DD 7E 00     PRINTSTR:   LD A,(IX)					; A Contains first char to print
+ 21+  80EC B7           			OR A						; check for end of string (0)
+ 22+  80ED C8           			RET Z						; Finish printing if 0
+ 23+  80EE CD 23 81     			CALL PRINTCHNUM
+ 24+  80F1 DD 23        			INC IX						; Move to next char in string
+ 25+  80F3 18 F4        			JR PRINTSTR					; Start over printing sequence
+ 26+  80F5              ; ----------------------------------------------------------------------------------------
+ 27+  80F5
+ 28+  80F5
+ 29+  80F5              ;-----------------------------------------------------------------------------------------
+ 30+  80F5              ; PREP_PRT - Updates Print_Attr, SCR & ATTR Vars
+ 31+  80F5              ;-----------------------------------------------------------------------------------------
+ 32+  80F5 32 69 81     PREP_PRT:	LD (PRINT_ATTR),A			; Set Attribute
+ 33+  80F8 CD FE 80     PREP_PRT_2:	CALL CRtoSCREEN
+ 34+  80FB C3 10 81     			JP CRtoATTR
+ 35+  80FE              ;-----------------------------------------------------------------------------------------
+ 36+  80FE
+ 37+  80FE              ;-----------------------------------------------------------------------------------------
+ 38+  80FE              ; CRtoSCREEN - Converts a scr char coord into a SCREEN Address   b,c = y,x positions
+ 39+  80FE              ;	IN  - B=Row, C=Column
+ 40+  80FE              ;	OUT - HL=Address in screen also stored in (SCR_CUR_PTR)
+ 41+  80FE              ;	Conversion:
+ 42+  80FE              ;			Row FFfff   Column CCCCC
+ 43+  80FE              ;			HL=%010FF000 fffCCCCC
+ 44+  80FE              ;-----------------------------------------------------------------------------------------
+ 45+  80FE              CRtoSCREEN:
+ 46+  80FE 78           			LD A,B						; %___FFfff
+ 47+  80FF F6 40        			OR #40						; %010FFfff
+ 48+  8101 E6 F8        			AND #F8						; %010FF000
+ 49+  8103 67           			LD H,A
+ 50+  8104
+ 51+  8104 78           			LD A,B						; %___FFfff
+ 52+  8105 E6 07        			AND #7						; %00000fff
+ 53+  8107 0F           			RRCA						; %f00000ff
+ 54+  8108 0F           			RRCA						; %ff00000f
+ 55+  8109 0F           			RRCA						; %fff00000
+ 56+  810A B1           			OR C						; %fffCCCCC
+ 57+  810B 6F           			LD L,A
+ 58+  810C 22 65 81                 LD (SCR_CUR_PTR),HL			; Update Variable
+ 59+  810F C9                       RET
+ 60+  8110              ; ----------------------------------------------------------------------------------------
+ 61+  8110
+ 62+  8110
+ 63+  8110
+ 64+  8110              ;-----------------------------------------------------------------------------------------
+ 65+  8110              ; CRtoATTR - Converts a screen char coord  into a ATTR Address  b,c = y,x positions
+ 66+  8110              ;	IN  - B=Row, C=Column
+ 67+  8110              ;	OUT - HL=Address in screen also stored in (SCR_ATTR_PTR)
+ 68+  8110              ;	Conversion:
+ 69+  8110              ;			Row FFfff   Column CCCCC
+ 70+  8110              ;			HL=%010110FF fffCCCCC
+ 71+  8110              ;-----------------------------------------------------------------------------------------
+ 72+  8110              CRtoATTR:
+ 73+  8110 78           			LD A,B						; %___FFfff
+ 74+  8111 0F           			RRCA						; %f000FFff
+ 75+  8112 0F           			RRCA						; %ff000FFf
+ 76+  8113 0F           			RRCA						; %fff000FF
+ 77+  8114 6F           			LD L,A
+ 78+  8115 E6 03        			AND 3						; %000000FF	value of FF can be only 00,01,10
+ 79+  8117 F6 58        			OR #58						; %010110FF value will be #58, #59 or #5A
+ 80+  8119 67           			LD H,A
+ 81+  811A
+ 82+  811A 7D           			LD A,L						; %fff000FF
+ 83+  811B E6 E0        			AND #E0						; %fff00000
+ 84+  811D B1           			OR C						; %fffCCCCC
+ 85+  811E 6F           			LD L,A
+ 86+  811F
+ 87+  811F 22 67 81                 LD (SCR_ATTR_PTR),HL		; Update Variable
+ 88+  8122 C9                       RET
+ 89+  8123              ; ----------------------------------------------------------------------------------------
+ 90+  8123
+ 91+  8123
+ 92+  8123
+ 93+  8123              ; ----------------------------------------------------------------------------------------
+ 94+  8123              ; PRINTCHNUM - Prints Char Number N (stored in A)
+ 95+  8123              ;-----------------------------------------------------------------------------------------
+ 96+  8123              PRINTCHNUM:	;SUB 32						; Adjust Ascii to charset
+ 97+  8123 26 00        			LD H,0						; Multiply value by 8 to get to right Char in Charset
+ 98+  8125 6F           			LD L,A
+ 99+  8126 29           			ADD HL,HL
+100+  8127 29           			ADD HL,HL
+101+  8128 29           			ADD HL,HL
+102+  8129 11 6A 80     			LD DE, CHARSET-(8*32)		; Optimize in compile time (instead of sub 32)
+103+  812C 19           			ADD HL,DE
+104+  812D EB           			EX  DE,HL					;Value in DE
+105+  812E              			; Continues to printchar below
+106+  812E              ; ----------------------------------------------------------------------------------------
+107+  812E
+108+  812E
+109+  812E              ; ----------------------------------------------------------------------------------------
+110+  812E              ; PRINTCHAR - Prints Char  (DE points to the char. Uses HL as last Cur Pointer)
+111+  812E              ; ----------------------------------------------------------------------------------------
+112+  812E              PRINTCHAR:
+113+  812E 06 08        			LD B,8						; 8 Lines per char
+114+  8130 2A 65 81                 LD HL, (SCR_CUR_PTR)		; Load Cursor Pointer y,x
+115+  8133
+116+  8133 1A           BYTEPCHAR:	LD A,(DE)					; Get Char to be printed, first line
+117+  8134 77           			LD (HL),A					; Move to Printing location
+118+  8135 24                       INC H						; inc H so next line in char (ZX Spectrum Screen RAM)
+119+  8136 13                       INC DE 						; next line to be printed
+120+  8137 10 FA                    DJNZ BYTEPCHAR				; Repeat 8 lines
+121+  8139 3A 69 81                 LD A,(PRINT_ATTR) 			; Load Attributes to print char with
+122+  813C 2A 67 81                 LD HL, (SCR_ATTR_PTR)
+123+  813F 77                       LD (HL),A
+124+  8140 21 67 81                 LD HL, SCR_ATTR_PTR			; Get pointer to ATTR
+125+  8143 34                       INC (HL)					; Move Attribute cursor to next char
+126+  8144 21 65 81     			LD HL, SCR_CUR_PTR
+127+  8147 34           			INC (HL)					; update Cursor pointer to next position
+128+  8148 C9                       RET
+129+  8149              ; ----------------------------------------------------------------------------------------
+130+  8149
+131+  8149
+132+  8149
+133+  8149              ; ----------------------------------------------------------------------------------------
+134+  8149              ; INK2PAPER - moves ink of attribute stored in (PRINT_ATTR) to paper and sets ink to 0
+135+  8149              ; 				Sets bright 1 and flash 0
+136+  8149              ; ----------------------------------------------------------------------------------------
+137+  8149 3A 69 81     INK2PAPER:	LD A, (PRINT_ATTR)		    ; Get storedAttribute
+138+  814C E6 07                    AND 7						; get Attr INK in A
+139+  814E 07           			RLCA
+140+  814F 07           			RLCA
+141+  8150 07           			RLCA						; move Ink to Paper
+142+  8151 F6 40        			OR 64						; ink 0 bright 1
+143+  8153 32 69 81     			LD (PRINT_ATTR),A		    ; Get storedAttribute
+144+  8156 C9           			RET
+145+  8157              ; ----------------------------------------------------------------------------------------
+146+  8157
+147+  8157
+148+  8157
+149+  8157
+150+  8157 21 00 40     CLEARSCR:	LD HL,$4000					; Erases screen by writing 0 to all pixels and attributes
+151+  815A 11 01 40     			LD DE,$4001
+152+  815D 01 FF 1A     			LD BC,6911
+153+  8160 36 00        			LD (HL),0
+154+  8162 ED B0        			LDIR
+155+  8164 C9           			RET
+156+  8165
+157+  8165
+158+  8165              SCR_CUR_PTR
+158+  8165 00 00          	db $00, $00				; Cursor Pointer in Screen (2 bytes) (HL)
+159+  8167 00 00        SCR_ATTR_PTR: 	db $00, $00				; Attr Pointer in Screen (2 bytes) (HL)
+160+  8169 00           PRINT_ATTR:		db $00					; Attribute used by printchar routine (1 byte)
+161+  816A
+162+  816A              CHARSET: incbin "charset.bin"			; Charset used
+163+  846A
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\printat.asm
+ 65   846A                      include "Textos.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Textos.asm
+  1+  846A              Texto1Print:;UFV 22
+  2+  846A 0E 17            ld c,23;columna
+  3+  846C 06 17            ld b,23;fila
+  4+  846E 3E 46            ld a,%01000110;color
+  5+  8470 DD 21 5F 85      ld ix,Texto1
+  6+  8474 CD E6 80         call PRINTAT
+  7+  8477 C9               RET
+  8+  8478              Texto2Print:;NIGHT RIDERS
+  9+  8478 0E 0A            ld c,10
+ 10+  847A 06 00            ld b,0
+ 11+  847C 3E 42            ld a,%01000010
+ 12+  847E DD 21 68 85      ld ix,Texto2
+ 13+  8482 CD E6 80         call PRINTAT
+ 14+  8485 C9               RET
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Textos.asm
+ 66   8486                      include "validacion.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\validacion.asm
+  1+  8486
+  2+  8486              ;pos inicial intento: 5849 ; +2, 3veces
+  3+  8486              ;pos inicial respuesta: 5851 ; +1, 3veces
+  4+  8486
+  5+  8486              ;--------------- VALIDAR -------------------------
+  6+  8486
+  7+  8486
+  8+  8486
+  9+  8486              reset_copia:
+ 10+  8486                      ;COPIAR
+ 11+  8486 01 04 00             LD BC, num_slots ;num_slots numero cuadrados en cada intento
+ 12+  8489 21 7A 85             LD HL, quiz
+ 13+  848C 11 7E 85             LD DE, copia
+ 14+  848F ED B0                LDIR ;copio BC n? de slots de HL en DE
+ 15+  8491
+ 16+  8491 3A 82 85             LD A,(negros)
+ 17+  8494 5F                   LD E,A
+ 18+  8495 DD 21 76 85          LD IX, intento ;ix usualmente para leer db
+ 19+  8499                      ;datos de entrada no deber?an tocarse
+ 20+  8499 FD 21 7E 85          LD IY, copia   ;iy tb
+ 21+  849D
+ 22+  849D
+ 23+  849D 06 04                LD B, num_slots
+ 24+  849F 0E 04                LD C, 4;para que en la pasada de blancos me haga las 4 pasadas de IX nada m?s (el de copia)
+ 25+  84A1
+ 26+  84A1              B1:;COINCIDENCIAS EXACTAS
+ 27+  84A1 DD 7E 00             LD A, (IX);cargo el primer elemento en a
+ 28+  84A4 FD 56 00             LD D, (IY);cargo el primer elemento en d
+ 29+  84A7
+ 30+  84A7 BA                   CP D;comparo D con A
+ 31+  84A8
+ 32+  84A8 20 09                JR NZ, B2; si no coincide salto a B2
+ 33+  84AA
+ 34+  84AA 1C                   INC E;aumento contador de negros
+ 35+  84AB
+ 36+  84AB                      ;entra bien aqui solo en elementos coincidentes
+ 37+  84AB
+ 38+  84AB                      ;al coincidir se cambia pero solo se busca la primera coincidencia no las de despues
+ 39+  84AB                      ;creo que asi me va a leer la coincidencia en el bucle anidado a lo mejor poner IX 128 e IY a 255
+ 40+  84AB DD 36 00 80          LD (IX), 128;sustituye por 128,para evitar coindicencias adicionales.
+ 41+  84AF FD 36 00 FF          LD (IY), 255;sustituye por 255,
+ 42+  84B3              B2:;PARA PASAR A LA SIGUIENTE
+ 43+  84B3 DD 23                INC IX;siguiente elemento de la lista
+ 44+  84B5 FD 23                INC IY;siguiente elemento de la lista
+ 45+  84B7
+ 46+  84B7
+ 47+  84B7 10 E8                DJNZ B1
+ 48+  84B9              ; Acabo b1 y reseteo a posicion inicial IX e IY
+ 49+  84B9
+ 50+  84B9 7B                   LD A, E;Negros,Guardar los aciertos exactos.
+ 51+  84BA 32 82 85             LD (negros), A;guardo el n? negros
+ 52+  84BD 3A 82 85             LD A, (negros)
+ 53+  84C0
+ 54+  84C0
+ 55+  84C0                      ;obtengo el n? de negros y lo guardo en e
+ 56+  84C0 3A 83 85             LD A,(blancos);blancos son los aciertos no exactos.
+ 57+  84C3 5F                   LD E, A;
+ 58+  84C4
+ 59+  84C4 06 04                LD B, num_slots;reseteamos b
+ 60+  84C6              reset1_IXIY:
+ 61+  84C6 DD 2B                DEC IX
+ 62+  84C8 FD 2B                DEC IY
+ 63+  84CA 10 FA                DJNZ reset1_IXIY
+ 64+  84CC
+ 65+  84CC              carga_pre_comp:
+ 66+  84CC 06 04                LD B, num_slots
+ 67+  84CE
+ 68+  84CE              CompBlanco1:;comparo para encontrar blancos
+ 69+  84CE
+ 70+  84CE                      ;carga en a y d para que siempre tengan los ultimos valores de ix
+ 71+  84CE DD 7E 00             LD A, (IX);cargo el primer elemento en a
+ 72+  84D1 FD 56 00             LD D, (IY);cargo el primer elemento en d
+ 73+  84D4
+ 74+  84D4 BA                   CP D;comparo D con A
+ 75+  84D5
+ 76+  84D5 20 09                JR NZ, CompBlanco2 ;si no son iguales salto a
+ 77+  84D7
+ 78+  84D7 1C                   INC E;registro ? (E es para que compile) que representa los blancos
+ 79+  84D8
+ 80+  84D8                      ;INC IX      si encuentro coincidencia no puede haber otra con el mismo numero entonces hago salto
+ 81+  84D8 DD 36 00 80          LD (IX), 128;sustituye por 128
+ 82+  84DC FD 36 00 FF          LD (IY), 255;sustituye por 128
+ 83+  84E0
+ 84+  84E0
+ 85+  84E0
+ 86+  84E0                      ;esto se deberia hacer pero entonces deberia controlar el numero de pasadas que hacer de iy
+ 87+  84E0                      ;JR reset2_IY hago el salto porque una vez encontrdo coincidencia
+ 88+  84E0
+ 89+  84E0              CompBlanco2:;Incremento la posici?n de IY 4 veces por posicion de IX y luego aumento IX 4 veces
+ 90+  84E0 FD 23                INC IY;incremento 1
+ 91+  84E2
+ 92+  84E2 10 EA                DJNZ CompBlanco1;cuando he recorrido todo IY paso al siguiente IX
+ 93+  84E4 DD 23                INC IX
+ 94+  84E6
+ 95+  84E6
+ 96+  84E6 06 04                LD B, num_slots;reseteamos b
+ 97+  84E8              reset2_IY:
+ 98+  84E8 FD 2B                DEC IY
+ 99+  84EA 10 FC                DJNZ reset2_IY
+100+  84EC                      ;aqui ya tengo la siguiente de la solucion pero para repetir necesito un registro
+101+  84EC
+102+  84EC              ;------------------------- Solucionar
+103+  84EC
+104+  84EC                      ;que registro?
+105+  84EC                      ;DEC registro;aqui disminuyes un registro que guarde numero de slots contador para IX hasta pasar por todo IX
+106+  84EC 0D                   DEC C
+107+  84ED              ;------------------------
+108+  84ED
+109+  84ED 20 DD                JR NZ, carga_pre_comp
+110+  84EF
+111+  84EF                      ;guardo numero de blancos en A para almacenarlo en la variable blancos
+112+  84EF 7B                   LD A, E
+113+  84F0 32 83 85             LD (blancos), A
+114+  84F3
+115+  84F3 C9                   RET
+116+  84F4
+117+  84F4
+118+  84F4              FINJUEGOW:
+119+  84F4 3A 82 85             ld a,(negros)
+120+  84F7 FE 04                CP 4
+121+  84F9 28 3D                jr z,FuncionVictoria
+122+  84FB C9                   RET
+123+  84FC
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\validacion.asm
+ 67   84FC                      include "PintarValidacion.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\PintarValidacion.asm
+  1+  84FC              PintarColor:
+  2+  84FC 11 08 00         ld de,$08;incremento 6 veces para llegar al espacio de validacion
+  3+  84FF 19               add hl,de;se lo sumo a hl
+  4+  8500 CD 0D 85         CALL Comprobarnegros;llamo a la función comprobar negros
+  5+  8503 CD 16 85         CALL ComprobarBlancos;llamos a la función comprobar blancos
+  6+  8506 CD F4 84         CALL FINJUEGOW
+  7+  8509 CD 2B 85         CALL ReinicioNyB;una vez pintados, los reinicio.
+  8+  850C C9               RET
+  9+  850D
+ 10+  850D              Comprobarnegros:;esta función comprueba si existen negros.
+ 11+  850D
+ 12+  850D 3A 82 85         ld a,(negros)
+ 13+  8510 47               ld b,a
+ 14+  8511 FE 00            CP 0;si existen negros los pinta saltando a la función pintar negros.
+ 15+  8513 20 0A            jr nz,pintarnegros
+ 16+  8515 C9               RET
+ 17+  8516              ComprobarBlancos:;está función compreuba si existen blancos.
+ 18+  8516 3A 83 85         ld a,(blancos)
+ 19+  8519 47               ld b,a
+ 20+  851A FE 00            CP 0;si existen blancos los pinta saltando a la función pintar blancos.
+ 21+  851C 20 07            jr nz,pintarBlancos
+ 22+  851E C9               RET
+ 23+  851F
+ 24+  851F
+ 25+  851F              pintarnegros:
+ 26+  851F              bucle:;realizo el bucle tantas veces como negros haya
+ 27+  851F 36 10            ld (hl),$10;los pinto de rojo
+ 28+  8521 23               inc hl;incremento hl para ponerlos al lado.
+ 29+  8522 10 FB            djnz bucle
+ 30+  8524 C9               RET
+ 31+  8525
+ 32+  8525              pintarBlancos:
+ 33+  8525              bucle2:;realizo el bucle tantas veces como blancos haya
+ 34+  8525 36 38            ld (hl),$38;los pintos de blanco.
+ 35+  8527 23               inc hl;incremento hl para ponerlos al lado.
+ 36+  8528 10 FB            djnz bucle2
+ 37+  852A C9               RET
+ 38+  852B              ReinicioNyB:;reiniciamos porque si no en la siguiente jugada se acumularía.
+ 39+  852B 3E 00            ld a,0
+ 40+  852D 32 83 85         ld (blancos),a;ponremos blancos a 0
+ 41+  8530 32 82 85         ld (negros),a;ponemos negros a 0
+ 42+  8533 C9               RET
+ 43+  8534              LOSE:
+ 44+  8534                 ; ld hl llamar a scr lose
+ 45+  8534 CD 4D 85        CALL cargarPantalla
+ 46+  8537 C9               RET
+ 47+  8538              FuncionVictoria:
+ 48+  8538 21 84 A0         ld hl,Win
+ 49+  853B CD 4D 85         CALL cargarPantalla
+ 50+  853E 76               HALT
+ 51+  853F
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\PintarValidacion.asm
+ 68   853F                      include "SlotXY.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\SlotXY.asm
+  1+  853F              slot_XY:
+  2+  853F 21 49 58             ld hl,$5849;slot1
+  3+  8542 3A 75 85             ld a,(intento_actual);mete el numero de intento en a
+  4+  8545
+  5+  8545 11 40 00             ld de,$40; de lo uso para sumar
+  6+  8548 47                    ld b,a;b es igual a
+  7+  8549              BucleFila:
+  8+  8549 19                   add hl,de
+  9+  854A 10 FD                djnz BucleFila
+ 10+  854C C9                   RET
+ 11+  854D
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\SlotXY.asm
+ 69   854D                      include "Imagen.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Imagen.asm
+  1+  854D              cargarPantalla:
+  2+  854D C5               push bc
+  3+  854E D5               push de
+  4+  854F
+  5+  854F 11 00 40         ld de,$4000
+  6+  8552 01 00 1B         ld bc,6912
+  7+  8555              buclepantalla:
+  8+  8555 ED A0            ldi
+  9+  8557
+ 10+  8557 78               ld a,b
+ 11+  8558 B1               or c
+ 12+  8559 C2 55 85         jp nz,buclepantalla
+ 13+  855C
+ 14+  855C D1               pop de
+ 15+  855D C1               pop bc
+ 16+  855E
+ 17+  855E C9               RET
+ 18+  855F
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Imagen.asm
+ 70   855F              ;Declaramos las variables y el texto a utilizar.
+ 71   855F 55 46 56 2D  Texto1: defm "UFV-2022",0
+ 71   8563 32 30 32 32
+ 71   8567 00
+ 72   8568 4E 69 67 68  Texto2: defm "Night riders",0
+ 72   856C 74 20 72 69
+ 72   8570 64 65 72 73
+ 72   8574 00
+ 73   8575
+ 74   8575 00           intento_actual DB 0;guarda el número de intento del jugador.
+ 75   8576 00 00 00 00  intento DB 0, 0, 0, 0;Intento jugador
+ 76   857A 20 28 30 10  quiz DB $20, $28, $30, $10;Combinacion ganadora,(verde claro,azul claro,amarillo,rojo)
+ 77   857E
+ 78   857E 00 00 00 00  copia DB 0, 0, 0, 0;copia quiz
+ 79   8582 00           negros DB 0;aciertos
+ 80   8583 00           blancos DB 0;color pero no la posicion
+ 81   8584
+ 82   8584              num_slots EQU 4;variable
+ 83   8584
+ 84   8584
+ 85   8584              ;Variables de las imagenes
+ 86   8584              Inicio: INCBIN PRUEBA1.scr
+ 87   A084              Win: INCBIN PRUEBA2.scr
+ 88   BB84
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\main.asm
