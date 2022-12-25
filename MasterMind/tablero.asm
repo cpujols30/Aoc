@@ -1,4 +1,4 @@
-pantalla:
+Dibujartablero:
        ld a,$00
        out($fe),a ;Ponemos el marco negro
        ld hl,$5828 ;posicion 5828 para poner el tablero en el medio

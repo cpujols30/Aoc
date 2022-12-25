@@ -13,57 +13,56 @@
  12   8004 21 84 85         ld hl,Inicio
  13   8007 CD 4D 85         CALL cargarPantalla
  14   800A
- 15   800A                  ;CALL pausa no funciona
- 16   800A CD 57 81         CALL CLEARSCR;Borramos la pantalla
- 17   800D
- 18   800D CD 4F 80         CALL pantalla;Dibujamos el tablero
- 19   8010 CD 6A 84         CALL Texto1Pint;Dibujamos el texto de la de abajo a la derecha UFV-2022
- 20   8013 CD 78 84         CALL Texto2Pint;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
- 21   8016 21 49 58         ld hl,$5849;pondremos hl en esa direccion para probar el funcionamiento
- 22   8019 0E 0A            ld c,10;ponemos c a 10 ya que son 10 intentos.
- 23   801B              Juego:
- 24   801B C5              push bc;nos guardamos c ya que la vamos a usar dentro del programa
- 25   801C 3A 75 85        ld a,(intento_actual)
- 26   801F
- 27   801F 57              ld d,a;intento actual se almacena en d para saber a que slot ir
- 28   8020 06 04            ld b,4
- 29   8022
- 30   8022 DD 21 76 85      ld ix,intento;apunta a intento para ir guardando los intentos.
- 31   8026 D5               push de;nos guardamos el intento actual
- 32   8027 E5                push hl;nos guardamos la posición del slot primero en la pila
- 33   8028              BucleIntentosInt:;este bucle pasa 4 veces,que son el número de slot
- 34   8028 CD 97 80         CALL JugarSlot;llamamos a JugarSlot para que juegue en el slot
- 35   802B 7E               ld a,(hl);meto el valor de hl en a
- 36   802C DD 77 00         ld (ix),a; meto el valor que ha introducido el usuario en intento
- 37   802F
- 38   802F DD 23            inc ix; incremeto intento para que el siguiente lo meta en intento +1
- 39   8031 23               inc hl;incrementamos hl 2 veces  para que vaya al siguiente slot.
- 40   8032 23               inc hl
- 41   8033 05               dec b;decrementamos b para hacer el bucle 2 veces
- 42   8034
- 43   8034 20 F2            jr nz,BucleIntentosInt
- 44   8036                 ;una vez termina el bucle llamamos a la función validación.
- 45   8036 CD 86 84         CALL reset_copia;validación
- 46   8039 E1               pop hl;sacamos hl para que esté en el primer slot de la fila que toca.
- 47   803A CD FC 84         CALL PintarColor;Llamamos a la función para que pinte en la validación
- 48   803D D1               pop de;sacamos d
- 49   803E 7A               ld a,d;metemos a en d y la incrementamos
- 50   803F 3C               inc a
- 51   8040 32 75 85         ld (intento_actual),a
- 52   8043
- 53   8043 CD 3F 85         CALL slot_XY;incremento hl en base al numero de intentos que hay
- 54   8046 C1               pop bc;sacamos bc para poder continuar con el bucle Juego.
- 55   8047 0D               dec c;
- 56   8048 20 D1           jr nz,Juego
- 57   804A CD 34 85         CALL LOSE
+ 15   800A CD 57 81         CALL CLEARSCR;Borramos la pantalla
+ 16   800D
+ 17   800D CD 4F 80         CALL Dibujartablero;Dibujamos el tablero
+ 18   8010 CD 6A 84         CALL Texto1Print;Dibujamos el texto de la de abajo a la derecha UFV-2022
+ 19   8013 CD 78 84         CALL Texto2Print;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
+ 20   8016 21 49 58         ld hl,$5849;pondremos hl en esa direccion para probar el funcionamiento
+ 21   8019 0E 0A            ld c,10;ponemos c a 10 ya que son 10 intentos.
+ 22   801B              Juego:
+ 23   801B C5              push bc;nos guardamos c ya que la vamos a usar dentro del programa
+ 24   801C 3A 75 85        ld a,(intento_actual)
+ 25   801F
+ 26   801F 57              ld d,a;intento actual se almacena en d para saber a que slot ir
+ 27   8020 06 04            ld b,4
+ 28   8022
+ 29   8022 DD 21 76 85      ld ix,intento;apunta a intento para ir guardando los intentos.
+ 30   8026 D5               push de;nos guardamos el intento actual
+ 31   8027 E5                push hl;nos guardamos la posición del slot primero en la pila
+ 32   8028              BucleIntentosInt:;este bucle pasa 4 veces,que son el número de slot
+ 33   8028 CD 97 80         CALL JugarSlot;llamamos a JugarSlot para que juegue en el slot
+ 34   802B 7E               ld a,(hl);meto el valor de hl en a
+ 35   802C DD 77 00         ld (ix),a; meto el valor que ha introducido el usuario en intento
+ 36   802F
+ 37   802F DD 23            inc ix; incremeto intento para que el siguiente lo meta en intento +1
+ 38   8031 23               inc hl;incrementamos hl 2 veces  para que vaya al siguiente slot.
+ 39   8032 23               inc hl
+ 40   8033 05               dec b;decrementamos b para hacer el bucle 2 veces
+ 41   8034
+ 42   8034 20 F2            jr nz,BucleIntentosInt
+ 43   8036                 ;una vez termina el bucle llamamos a la función validación.
+ 44   8036 CD 86 84         CALL reset_copia;validación
+ 45   8039 E1               pop hl;sacamos hl para que esté en el primer slot de la fila que toca.
+ 46   803A CD FC 84         CALL PintarColor;Llamamos a la función para que pinte en la validación
+ 47   803D D1               pop de;sacamos d
+ 48   803E 7A               ld a,d;metemos a en d y la incrementamos
+ 49   803F 3C               inc a
+ 50   8040 32 75 85         ld (intento_actual),a
+ 51   8043
+ 52   8043 CD 3F 85         CALL slot_XY;incremento hl en base al numero de intentos que hay
+ 53   8046 C1               pop bc;sacamos bc para poder continuar con el bucle Juego.
+ 54   8047 0D               dec c;
+ 55   8048 20 D1           jr nz,Juego
+ 56   804A CD 34 85         CALL LOSE
+ 57   804D
  58   804D
- 59   804D
- 60   804D              ;-------------------------------------------------------------------------------------------------
- 61   804D 18 FE        fin:            jr fin          ; Bucle infinito
- 62   804F              ;incluimos las rutinas externas
- 63   804F                      include "pantalla.asm"
-# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\pantalla.asm
-  1+  804F              pantalla:
+ 59   804D              ;-------------------------------------------------------------------------------------------------
+ 60   804D 18 FE        fin:            jr fin          ; Bucle infinito
+ 61   804F              ;incluimos las rutinas externas
+ 62   804F                      include "tablero.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\tablero.asm
+  1+  804F              Dibujartablero:
   2+  804F 3E 00               ld a,$00
   3+  8051 D3 FE               out($fe),a ;Ponemos el marco negro
   4+  8053 21 28 58            ld hl,$5828 ;posicion 5828 para poner el tablero en el medio
@@ -118,8 +117,8 @@
  53+  8093 0D                   dec c
  54+  8094 20 FB                jr nz,bucleinf ;finaliza el bucle de la linea inferior
  55+  8096 C9                   RET
-# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\pantalla.asm
- 64   8097                      include "Teclado.asm"
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\tablero.asm
+ 63   8097                      include "Teclado.asm"
 # file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Teclado.asm
   1+  8097              JugarSlot:
   2+  8097 1E 00                ld e,$00;funcion que usaremos para que nos almacene cada color
@@ -181,7 +180,7 @@
  58+  80E2 1E 32                ld e,$32
  59+  80E4 28 C7                jr z,EsperarPulsar
 # file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Teclado.asm
- 65   80E6                      include "printat.asm"
+ 64   80E6                      include "printat.asm"
 # file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\printat.asm
   1+  80E6              ; -------------------------------
   2+  80E6              ; ZX Spectrum Text print library
@@ -348,24 +347,24 @@
 162+  816A              CHARSET: incbin "charset.bin"			; Charset used
 163+  846A
 # file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\printat.asm
- 66   846A                      include "Intento.asm"
-# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Intento.asm
-  1+  846A              Texto1Pint:;UFV 22
+ 65   846A                      include "Textos.asm"
+# file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Textos.asm
+  1+  846A              Texto1Print:;UFV 22
   2+  846A 0E 17            ld c,23;columna
   3+  846C 06 17            ld b,23;fila
   4+  846E 3E 46            ld a,%01000110;color
   5+  8470 DD 21 5F 85      ld ix,Texto1
   6+  8474 CD E6 80         call PRINTAT
   7+  8477 C9               RET
-  8+  8478              Texto2Pint:;NIGHT RIDERS
+  8+  8478              Texto2Print:;NIGHT RIDERS
   9+  8478 0E 0A            ld c,10
  10+  847A 06 00            ld b,0
  11+  847C 3E 42            ld a,%01000010
  12+  847E DD 21 68 85      ld ix,Texto2
  13+  8482 CD E6 80         call PRINTAT
  14+  8485 C9               RET
-# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Intento.asm
- 67   8486                      include "validacion.asm"
+# file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Textos.asm
+ 66   8486                      include "validacion.asm"
 # file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\validacion.asm
   1+  8486
   2+  8486              ;pos inicial intento: 5849 ; +2, 3veces
@@ -491,7 +490,7 @@
 122+  84FB C9                   RET
 123+  84FC
 # file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\validacion.asm
- 68   84FC                      include "PintarValidacion.asm"
+ 67   84FC                      include "PintarValidacion.asm"
 # file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\PintarValidacion.asm
   1+  84FC              PintarColor:
   2+  84FC 11 08 00         ld de,$08;incremento 6 veces para llegar al espacio de validacion
@@ -545,7 +544,7 @@
  50+  853E 76               HALT
  51+  853F
 # file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\PintarValidacion.asm
- 69   853F                      include "SlotXY.asm"
+ 68   853F                      include "SlotXY.asm"
 # file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\SlotXY.asm
   1+  853F              slot_XY:
   2+  853F 21 49 58             ld hl,$5849;slot1
@@ -559,7 +558,7 @@
  10+  854C C9                   RET
  11+  854D
 # file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\SlotXY.asm
- 70   854D                      include "Imagen.asm"
+ 69   854D                      include "Imagen.asm"
 # file opened: c:\Users\cpujo\Desktop\Aoc\MasterMind\Imagen.asm
   1+  854D              cargarPantalla:
   2+  854D C5               push bc
@@ -580,28 +579,28 @@
  17+  855E C9               RET
  18+  855F
 # file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\Imagen.asm
- 71   855F              ;Declaramos las variables y el texto a utilizar.
- 72   855F 55 46 56 2D  Texto1: defm "UFV-2022",0
- 72   8563 32 30 32 32
- 72   8567 00
- 73   8568 4E 69 67 68  Texto2: defm "Night riders",0
- 73   856C 74 20 72 69
- 73   8570 64 65 72 73
- 73   8574 00
- 74   8575
- 75   8575 00           intento_actual DB 0;guarda el número de intento del jugador.
- 76   8576 00 00 00 00  intento DB 0, 0, 0, 0;Intento jugador
- 77   857A 20 28 30 10  quiz DB $20, $28, $30, $10;Combinacion ganadora,(verde claro,azul claro,amarillo,rojo)
- 78   857E
- 79   857E 00 00 00 00  copia DB 0, 0, 0, 0;copia quiz
- 80   8582 00           negros DB 0;aciertos
- 81   8583 00           blancos DB 0;color pero no la posicion
- 82   8584
- 83   8584              num_slots EQU 4;variable
+ 70   855F              ;Declaramos las variables y el texto a utilizar.
+ 71   855F 55 46 56 2D  Texto1: defm "UFV-2022",0
+ 71   8563 32 30 32 32
+ 71   8567 00
+ 72   8568 4E 69 67 68  Texto2: defm "Night riders",0
+ 72   856C 74 20 72 69
+ 72   8570 64 65 72 73
+ 72   8574 00
+ 73   8575
+ 74   8575 00           intento_actual DB 0;guarda el número de intento del jugador.
+ 75   8576 00 00 00 00  intento DB 0, 0, 0, 0;Intento jugador
+ 76   857A 20 28 30 10  quiz DB $20, $28, $30, $10;Combinacion ganadora,(verde claro,azul claro,amarillo,rojo)
+ 77   857E
+ 78   857E 00 00 00 00  copia DB 0, 0, 0, 0;copia quiz
+ 79   8582 00           negros DB 0;aciertos
+ 80   8583 00           blancos DB 0;color pero no la posicion
+ 81   8584
+ 82   8584              num_slots EQU 4;variable
+ 83   8584
  84   8584
- 85   8584
- 86   8584              ;Variables de las imagenes
- 87   8584              Inicio: INCBIN PRUEBA1.scr
- 88   A084              Win: INCBIN PRUEBA2.scr
- 89   BB84
+ 85   8584              ;Variables de las imagenes
+ 86   8584              Inicio: INCBIN PRUEBA1.scr
+ 87   A084              Win: INCBIN PRUEBA2.scr
+ 88   BB84
 # file closed: c:\Users\cpujo\Desktop\Aoc\MasterMind\main.asm

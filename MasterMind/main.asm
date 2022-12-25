@@ -12,12 +12,11 @@ inicio:         di              ; Deshabilitar interrupciones
     ld hl,Inicio
     CALL cargarPantalla
 
-    ;CALL pausa no funciona
     CALL CLEARSCR;Borramos la pantalla
 
-    CALL pantalla;Dibujamos el tablero
-    CALL Texto1Pint;Dibujamos el texto de la de abajo a la derecha UFV-2022
-    CALL Texto2Pint;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
+    CALL Dibujartablero;Dibujamos el tablero
+    CALL Texto1Print;Dibujamos el texto de la de abajo a la derecha UFV-2022
+    CALL Texto2Print;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
     ld hl,$5849;pondremos hl en esa direccion para probar el funcionamiento
     ld c,10;ponemos c a 10 ya que son 10 intentos.
 Juego:
@@ -60,10 +59,10 @@ BucleIntentosInt:;este bucle pasa 4 veces,que son el número de slot
 ;-------------------------------------------------------------------------------------------------
 fin:            jr fin          ; Bucle infinito
 ;incluimos las rutinas externas
-        include "pantalla.asm"
+        include "tablero.asm"
         include "Teclado.asm"
         include "printat.asm"
-        include "Intento.asm"
+        include "Textos.asm"
         include "validacion.asm"
         include "PintarValidacion.asm"
         include "SlotXY.asm"
