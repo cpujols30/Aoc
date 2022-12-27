@@ -11,21 +11,24 @@ inicio:         di              ; Deshabilitar interrupciones
     
     ld hl,Inicio
     CALL cargarPantalla
-
+    CALL Fpausa;llamamos a las funciones que nos pausen el programa
+    CALL Fpausa
+    
     CALL CLEARSCR;Borramos la pantalla
 
     CALL Dibujartablero;Dibujamos el tablero
     CALL Texto1Print;Dibujamos el texto de la de abajo a la derecha UFV-2022
     CALL Texto2Print;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
     ld hl,$5849;pondremos hl en esa direccion para probar el funcionamiento
+    ld(intento_actual+1),hl
     ld c,10;ponemos c a 10 ya que son 10 intentos.
 Juego:
    push bc;nos guardamos c ya que la vamos a usar dentro del programa
-   ld a,(intento_actual)
-   
+    CALL ImprimirIntento;imprimimos el texto que nos indica el numero de intenteto por el que va el usuario
+   ld a,(intento_actual) 
    ld d,a;intento actual se almacena en d para saber a que slot ir
     ld b,4
-   
+   ld hl,(intento_actual+1)
     ld ix,intento;apunta a intento para ir guardando los intentos.
     push de;nos guardamos el intento actual
      push hl;nos guardamos la posición del slot primero en la pila
@@ -50,10 +53,12 @@ BucleIntentosInt:;este bucle pasa 4 veces,que son el número de slot
     ld (intento_actual),a
    
     CALL slot_XY;incremento hl en base al numero de intentos que hay
+    ld (intento_actual+1),hl
     pop bc;sacamos bc para poder continuar con el bucle Juego.
-    dec c;
+    dec c;decremetamos para seguir el bucle principal
    jr nz,Juego
-    CALL LOSE
+    ;una vez realizado 10 intentos, el usuario recibira la imagen de derrota.
+    CALL FuncionDerrota
 
 
 ;-------------------------------------------------------------------------------------------------
@@ -67,11 +72,23 @@ fin:            jr fin          ; Bucle infinito
         include "PintarValidacion.asm"
         include "SlotXY.asm"
         include "Imagen.asm"
+        include "pausa.asm"
 ;Declaramos las variables y el texto a utilizar.
 Texto1: defm "UFV-2022",0
 Texto2: defm "Night riders",0
 
-intento_actual DB 0;guarda el número de intento del jugador.
+Texto3: defm "Intento:1",0
+Texto4: defm "Intento:2",0
+Texto5: defm "Intento:3",0
+Texto6: defm "Intento:4",0
+Texto7: defm "Intento:5",0
+Texto8: defm "Intento:6",0
+Texto9: defm "Intento:7",0
+Texto10: defm "Intento:8",0
+Texto11: defm "Intento:9",0
+Texto12: defm "Intento:10",0
+
+intento_actual DB 0,0;guarda el número de intento del jugador.
 intento DB 0, 0, 0, 0;Intento jugador
 quiz DB $20, $28, $30, $10;Combinacion ganadora,(verde claro,azul claro,amarillo,rojo)
 
@@ -83,5 +100,7 @@ num_slots EQU 4;variable
 
 
 ;Variables de las imagenes
-Inicio: INCBIN PRUEBA1.scr
-Win: INCBIN PRUEBA2.scr
+Inicio: INCBIN ImagenInicio.scr
+Win: INCBIN ImagenVictoria.scr
+Lose: INCBIN ImagenGameOver.scr
+

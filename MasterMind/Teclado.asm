@@ -32,20 +32,22 @@ EsperarPulsar:
 
 TeclaQPulsada:;entra aqui si esta pulsando una tecla q
         ld a,e
+        cp $40; si pasa el ultimo color salta al ReinicioColor1 que pone el color de e al primer color 
+       jr z,ReinicioColor1
        add $08;sumamos el color a e
         ld(hl),a
         ld e,a
-       cp $40; si pasa el ultimo color salta al ReinicioColor1 que pone el color de e al primer color 
-       jr z,ReinicioColor1
+    
         RET
 
 TeclaWPulsada:
         ld a,e
+        cp $00; si llega al primero,reiniciamos el color para que llegue al último 
+        jr z,ReinicioColor2
         sub $08;al pusar la tecla w,restamos el color a e
         ld(hl),a 
         ld e,a
-        cp $00; si llega al primero,reiniciamos el color para que llegue al último 
-        jr z,ReinicioColor2
+
         RET
 TeclaTPulsada:;si pulsa la tecla t a=1,lo usaremos para finalizar el programa
         ld a,1
@@ -53,7 +55,11 @@ TeclaTPulsada:;si pulsa la tecla t a=1,lo usaremos para finalizar el programa
 
 ReinicioColor1:;Esta tecla pone el color e al principio
         ld e,$00
+        ld a,e
+        ld (hl),a
         jr z,EsperarPulsar
 ReinicioColor2:;Esta tecla pone el color e al final
-        ld e,$32
+        ld e,$38
+         ld a,e
+        ld (hl),a
         jr z,EsperarPulsar   

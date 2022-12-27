@@ -40,11 +40,24 @@ ReinicioNyB:;reiniciamos porque si no en la siguiente jugada se acumularía.
     ld (blancos),a;ponremos blancos a 0
     ld (negros),a;ponemos negros a 0
     RET
-LOSE:
-   ; ld hl llamar a scr lose
-   CALL cargarPantalla
-    RET
 FuncionVictoria:
     ld hl,Win
     CALL cargarPantalla
+    
+    CALL Fpausa
+    CALL Fpausa
+
+    CALL CLEARSCR   
     HALT
+FuncionDerrota:
+    ld hl,Lose
+    CALL cargarPantalla
+    
+    CALL Fpausa
+    CALL Fpausa
+
+    CALL CLEARSCR  
+    CALL Fpausa
+    CALL inicio 
+    HALT
+
