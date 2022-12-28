@@ -6,7 +6,7 @@
 
 
 
-reset_copia:
+Validar:
         ;COPIAR 
         LD BC, num_slots ;num_slots numero cuadrados en cada intento
         LD HL, quiz

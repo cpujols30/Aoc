@@ -10,13 +10,14 @@ inicio:         di              ; Deshabilitar interrupciones
     ;PANTALLA DE INICIO
     
     ld hl,Inicio
-    CALL cargarPantalla
-    CALL Fpausa;llamamos a las funciones que nos pausen el programa
-    CALL Fpausa
+    CALL cargarPantalla;cargamos la pantalla de inicio
+    CALL Fpausa;llamamos a las funcion que nos pause el programa
     
     CALL CLEARSCR;Borramos la pantalla
 
     CALL Dibujartablero;Dibujamos el tablero
+    ld a,0
+    ld (intento_actual),a;ponemos el intento actual a 0 para que no guarde el conteo de la primera partida jugada(después de 10 intentos) 
     CALL Texto1Print;Dibujamos el texto de la de abajo a la derecha UFV-2022
     CALL Texto2Print;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
     ld hl,$5849;pondremos hl en esa direccion para probar el funcionamiento
@@ -27,12 +28,12 @@ Juego:
     CALL ImprimirIntento;imprimimos el texto que nos indica el numero de intenteto por el que va el usuario
    ld a,(intento_actual) 
    ld d,a;intento actual se almacena en d para saber a que slot ir
-    ld b,4
-   ld hl,(intento_actual+1)
+    ld b,4;declaramos el bucle de dentro
+   ld hl,(intento_actual+1);metemos el slot correspondiente en hl
     ld ix,intento;apunta a intento para ir guardando los intentos.
     push de;nos guardamos el intento actual
-     push hl;nos guardamos la posición del slot primero en la pila
-BucleIntentosInt:;este bucle pasa 4 veces,que son el número de slot
+     push hl; lo guardaremos en la pila para usarlo al  pintar la validación
+BucleIntentosInt:;este bucle pasa 4 veces,lo que hace es guardar el intento del usuario
     CALL JugarSlot;llamamos a JugarSlot para que juegue en el slot 
     ld a,(hl);meto el valor de hl en a 
     ld (ix),a; meto el valor que ha introducido el usuario en intento
@@ -40,20 +41,20 @@ BucleIntentosInt:;este bucle pasa 4 veces,que son el número de slot
     inc ix; incremeto intento para que el siguiente lo meta en intento +1
     inc hl;incrementamos hl 2 veces  para que vaya al siguiente slot.
     inc hl
-    dec b;decrementamos b para hacer el bucle 2 veces
+    dec b;decrementamos b para hacer el bucle 4 veces
 
     jr nz,BucleIntentosInt
    ;una vez termina el bucle llamamos a la función validación.
-    CALL reset_copia;validación
+    CALL Validar;validación
     pop hl;sacamos hl para que esté en el primer slot de la fila que toca.
     CALL PintarColor;Llamamos a la función para que pinte en la validación
     pop de;sacamos d
     ld a,d;metemos a en d y la incrementamos 
     inc a 
-    ld (intento_actual),a
+    ld (intento_actual),a;actualizamos en  intento_actual el número de intento del usuario 
    
-    CALL slot_XY;incremento hl en base al numero de intentos que hay
-    ld (intento_actual+1),hl
+    CALL slot_XY;incremento hl en base al numero de intentos que hay con la función Slot_XY
+    ld (intento_actual+1),hl;Metemos en intento_actual+1 la posición del slot del intento correspondiente
     pop bc;sacamos bc para poder continuar con el bucle Juego.
     dec c;decremetamos para seguir el bucle principal
    jr nz,Juego
@@ -74,7 +75,7 @@ fin:            jr fin          ; Bucle infinito
         include "Imagen.asm"
         include "pausa.asm"
 ;Declaramos las variables y el texto a utilizar.
-Texto1: defm "UFV-2022",0
+Texto1: defm "UFV-22/23",0
 Texto2: defm "Night riders",0
 
 Texto3: defm "Intento:1",0
@@ -88,7 +89,7 @@ Texto10: defm "Intento:8",0
 Texto11: defm "Intento:9",0
 Texto12: defm "Intento:10",0
 
-intento_actual DB 0,0;guarda el número de intento del jugador.
+intento_actual DB 0,0;intento_actual guarda el numero de intento, intento_actual+1 guarda la posición del 1ºslot
 intento DB 0, 0, 0, 0;Intento jugador
 quiz DB $20, $28, $30, $10;Combinacion ganadora,(verde claro,azul claro,amarillo,rojo)
 

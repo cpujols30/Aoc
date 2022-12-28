@@ -1,7 +1,7 @@
 Fpausa:;Función para que el programa pierda tiempo haciendo operaciones 
     push af;Guardamos los valores de af,bc
     push bc
-    ld bc,$A000
+    ld bc,$F000
 buclePausa:;hacemos un bucle que realice operaciones y que pause el programa
     dec bc
     ld a,b 
