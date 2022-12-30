@@ -7,7 +7,7 @@ inicio:         di              ; Deshabilitar interrupciones
         
 ;-------------------------------------------------------------------------------------------------
 ;Código del estudiante
-    ;PANTALLA DE INICIO
+    ;JUEGO
     
     ld hl,Inicio
     CALL cargarPantalla;cargamos la pantalla de inicio
@@ -18,10 +18,10 @@ inicio:         di              ; Deshabilitar interrupciones
     CALL Dibujartablero;Dibujamos el tablero
     ld a,0
     ld (intento_actual),a;ponemos el intento actual a 0 para que no guarde el conteo de la primera partida jugada(después de 10 intentos) 
-    CALL Texto1Print;Dibujamos el texto de la de abajo a la derecha UFV-2022
+    CALL Texto1Print;Dibujamos el texto de la de abajo a la derecha UFV-22723
     CALL Texto2Print;Dibujamos el texto de la arriba en el centro.Nombre del grupo, night riders
     ld hl,$5849;pondremos hl en esa direccion para probar el funcionamiento
-    ld(intento_actual+1),hl
+    ld(intento_actual+1),hl;guardaremos la posición del slot 
     ld c,10;ponemos c a 10 ya que son 10 intentos.
 Juego:
    push bc;nos guardamos c ya que la vamos a usar dentro del programa
@@ -45,7 +45,7 @@ BucleIntentosInt:;este bucle pasa 4 veces,lo que hace es guardar el intento del 
 
     jr nz,BucleIntentosInt
    ;una vez termina el bucle llamamos a la función validación.
-    CALL Validar;validación
+    CALL Validar;llamamos a la validación
     pop hl;sacamos hl para que esté en el primer slot de la fila que toca.
     CALL PintarColor;Llamamos a la función para que pinte en la validación
     pop de;sacamos d
@@ -64,6 +64,8 @@ BucleIntentosInt:;este bucle pasa 4 veces,lo que hace es guardar el intento del 
 
 ;-------------------------------------------------------------------------------------------------
 fin:            jr fin          ; Bucle infinito
+;FIN DE JUEGO
+
 ;incluimos las rutinas externas
         include "tablero.asm"
         include "Teclado.asm"
@@ -75,6 +77,7 @@ fin:            jr fin          ; Bucle infinito
         include "Imagen.asm"
         include "pausa.asm"
 ;Declaramos las variables y el texto a utilizar.
+
 Texto1: defm "UFV-22/23",0
 Texto2: defm "Night riders",0
 
@@ -89,6 +92,7 @@ Texto10: defm "Intento:8",0
 Texto11: defm "Intento:9",0
 Texto12: defm "Intento:10",0
 
+;Variables del juego a utilizar
 intento_actual DB 0,0;intento_actual guarda el numero de intento, intento_actual+1 guarda la posición del 1ºslot
 intento DB 0, 0, 0, 0;Intento jugador
 quiz DB $20, $28, $30, $10;Combinacion ganadora,(verde claro,azul claro,amarillo,rojo)

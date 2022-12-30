@@ -1,9 +1,5 @@
 
-;pos inicial intento: 5849 ; +2, 3veces
-;pos inicial respuesta: 5851 ; +1, 3veces
-
 ;--------------- VALIDAR -------------------------
-
 
 
 Validar:
@@ -99,12 +95,7 @@ reset2_IY:
         DJNZ reset2_IY
         ;aqui ya tengo la siguiente de la solucion pero para repetir necesito un registro
 
-;------------------------- Solucionar
-
-        ;que registro?
-        ;DEC registro;aqui disminuyes un registro que guarde numero de slots contador para IX hasta pasar por todo IX
         DEC C
-;------------------------        
 
         JR NZ, carga_pre_comp
         

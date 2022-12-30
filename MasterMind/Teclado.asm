@@ -1,4 +1,4 @@
-JugarSlot:
+JugarSlot:;función que nos jugará un slot.
         ld e,$00;funcion que usaremos para que nos almacene cada color
 bucleteclas:
     CALL EsperarSoltar;llamamos a la funcion EsperarSoltar

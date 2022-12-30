@@ -2,8 +2,8 @@ PintarColor:
     ld de,$08;incremento 6 veces para llegar al espacio de validacion
     add hl,de;se lo sumo a hl 
     CALL Comprobarnegros;llamo a la función comprobar negros
-    CALL ComprobarBlancos;llamos a la función comprobar blancos
-    CALL FINJUEGOW
+    CALL ComprobarBlancos;llamo a la función comprobar blancos
+    CALL FINJUEGOW;llamamos a fin de juego de victoria que pintará la imagen de victoria si se acierta.
     CALL ReinicioNyB;una vez pintados, los reinicio.
     RET
 
@@ -40,7 +40,7 @@ ReinicioNyB:;reiniciamos porque si no en la siguiente jugada se acumularía.
     ld (blancos),a;ponremos blancos a 0
     ld (negros),a;ponemos negros a 0
     RET
-FuncionVictoria:
+FuncionVictoria:;función que pintará la victoria
     ld hl,Win
     CALL cargarPantalla
     
@@ -49,7 +49,7 @@ FuncionVictoria:
 
     CALL CLEARSCR   
     HALT
-FuncionDerrota:
+FuncionDerrota:;función que pintará la derrota.
     ld hl,Lose
     CALL cargarPantalla
     
